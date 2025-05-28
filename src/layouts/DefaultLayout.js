@@ -5,12 +5,12 @@ import Sidebar from '~/components/Sidebar';
 const DefaultLayout = ({ children, notificationConnection }) => {
     return (
         <div className="d-flex">
-            <Sidebar />
+            {/* <Sidebar /> */}
             <div style={{ flex: 1 }}>
-                <Header notificationConnection={notificationConnection} />
+                {/* <Header notificationConnection={notificationConnection} /> */}
                 <div className="d-flex">
                     <div style={{ marginLeft: '7.6rem', marginTop: '-2.6rem', flex: 1 }}>{children}</div>
-                    <FriendsList />
+                    {/* <FriendsList /> */}
                 </div>
             </div>
         </div>

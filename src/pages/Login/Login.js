@@ -7,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-regular-svg-icons';
 import styles from './Login.module.scss';
 import customToastify from '~/utils/customToastify';
-import { loginService, signUpService } from '~/services/authServices';
+import { loginService, verifyOtpService } from '~/services/authServices';
 import { getMyInfoService } from '~/services/userServices';
 import * as actions from '~/redux/actions';
 
@@ -28,21 +28,18 @@ function Login() {
         }
     }, []);
 
-    const [loginInfo, setLoginInfo] = useState({ email: '', password: '' });
+    const [loginInfo, setLoginInfo] = useState({ email: ''});
     const [showPasswordLogin, setShowPasswordLogin] = useState(false);
     const [validatedFormLogin, setValidatedFormLogin] = useState(false);
     const [errorLogin, setErrorLogin] = useState('');
 
     const loginFormRef = useRef(null);
     const signUpFormRef = useRef(null);
-    const emailSignupRef = useRef(null);
+    const otpRef = useRef(null);
 
     const [signUpInfo, setSignUpInfo] = useState({
-        lastName: '',
-        firstName: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
+        email:'',
+        otp :'',
     });
 
     const [showFormSignUp, setShowFormSignUp] = useState(false);
@@ -76,27 +73,35 @@ function Login() {
                 e.preventDefault();
                 e.stopPropagation();
                 setValidatedFormLogin(true);
+                setErrorLogin('Email không đúng định dạng');
             } else {
-                await loginService(loginInfo);
-                localStorage.setItem('isAuthenticated', true);
-                navigate('/');
-                const fetchPersonalInfo = async () => {
-                    const res = (await getMyInfoService()).data;
-                    dispatch(
-                        actions.saveUserInfo({
-                            id: res?.id,
-                            firstName: res?.firstName,
-                            lastName: res?.lastName,
-                            age: '18',
-                            avatar: res?.avatarUrl,
-                            address: res?.address,
-                            school: 'Haui',
-                            workplace: 'NewwaveJSC',
-                            role: res?.role,
-                        }),
-                    );
-                };
-                fetchPersonalInfo();
+                var res =  await loginService(loginInfo);
+                if(res.isSuccess)
+                {
+                    setShowFormSignUp(true);
+                    setErrorLogin('');
+                }
+                else
+                {
+                    setErrorLogin(res.Message);
+                }
+                // const fetchPersonalInfo = async () => {
+                //     const res = (await getMyInfoService()).data;
+                //     dispatch(
+                //         actions.saveUserInfo({
+                //             id: res?.id,
+                //             firstName: res?.firstName,
+                //             lastName: res?.lastName,
+                //             age: '18',
+                //             avatar: res?.avatarUrl,
+                //             address: res?.address,
+                //             school: 'Haui',
+                //             workplace: 'NewwaveJSC',
+                //             role: res?.role,
+                //         }),
+                //     );
+                // };
+                // fetchPersonalInfo();
             }
         } catch (error) {
             console.log(error);
@@ -126,31 +131,36 @@ function Login() {
                 e.stopPropagation();
                 setValidatedFormSignUp(true);
             } else {
-                await signUpService({
-                    lastName: signUpInfo.lastName,
-                    firstName: signUpInfo.firstName,
-                    email: signUpInfo.email,
-                    password: signUpInfo.password,
+                var res = await verifyOtpService({
+                    email: loginInfo.email,
+                    otp: signUpInfo.otp,
                 });
 
-                customToastify.success('Đăng ký tài khoản thành công!');
+                if(res.isVerified)
+                {
+                    customToastify.success('Đăng nhập thành công!');
 
-                setSignUpInfo({
-                    lastName: '',
-                    firstName: '',
-                    email: '',
-                    password: '',
-                    confirmPassword: '',
-                });
+                    setSignUpInfo({
+                        otp: '',
+                        email: '',
+                    });
 
-                setShowPasswordSignUp(false);
-                setValidatedFormSignUp(false);
-                setShowFormSignUp(false);
+                    setShowPasswordSignUp(false);
+                    setValidatedFormSignUp(false);
+                    setShowFormSignUp(false);
+                    localStorage.setItem('isAuthenticated', true);
+                    navigate('/');
+                }
+                else
+                {
+                    setemailExisted([...emailExisted, signUpInfo.otp]);
+                    customToastify.error('Mã OTP không chính xác hoặc đã hết hạn');
+                }
             }
         } catch (error) {
             if (Number(error.status) === 400) {
                 setValidatedFormSignUp(true);
-                setemailExisted([...emailExisted, signUpInfo.email]);
+                setemailExisted([...emailExisted, signUpInfo.otp]);
             }
         }
     };
@@ -170,161 +180,61 @@ function Login() {
                             value={loginInfo.email}
                             name="email"
                             className="fz-16"
-                            type="text"
+                            type="Email"
                             placeholder="Email"
                             required
                             onKeyUp={handleEnterToLogin}
                             onChange={handleChangeFormLogin}
                         />
                     </Form.Group>
-                    <Form.Group className="mb-3 position-relative" as={Col} md="12">
-                        <Form.Control
-                            value={loginInfo.password}
-                            name="password"
-                            className="fz-16"
-                            type={showPasswordLogin ? 'text' : 'password'}
-                            placeholder="Password"
-                            required
-                            onKeyUp={handleEnterToLogin}
-                            onChange={handleChangeFormLogin}
-                        />
-                        {showPasswordLogin ? (
-                            <FontAwesomeIcon
-                                className={clsx(styles['show-hide-password'])}
-                                icon={faEye}
-                                onClick={toggleShowPasswordLogin}
-                            />
-                        ) : (
-                            <FontAwesomeIcon
-                                className={clsx(styles['show-hide-password'])}
-                                icon={faEyeSlash}
-                                onClick={toggleShowPasswordLogin}
-                            />
-                        )}
-                    </Form.Group>
                     {errorLogin && (
                         <div className={clsx('mb-3', styles['invalid-feedback'])}>
-                            Tài khoản hoặc mật khẩu của bạn không chính xác
+                            Tài khoản của bạn không chính xác
                         </div>
                     )}
                 </Form>
                 <Button className="w-100 fz-16" onClick={handleSubmitFormLogin}>
-                    Đăng nhập
+                    Tiếp theo
                 </Button>
-                <Link to="forgot-password" className={clsx(styles['forgot-password'])}>
-                    Quên mật khẩu?
-                </Link>
                 <div className={clsx('d-flex justify-content-center', styles['sign-up-wrapper'])}>
-                    <Button className={clsx(styles['sign-up-btn'])} onClick={handleShowFormSignUp}>
-                        Tạo tài khoản mới
-                    </Button>
-
                     <Modal show={showFormSignUp} onHide={handleCloseFormSignUp}>
                         <Modal.Header closeButton>
                             <Modal.Title>
-                                <div className={clsx(styles['modal-sign-up-title'])}>Đăng ký</div>
+                                <div className={clsx(styles['modal-sign-up-title'])}>Nhập mã OTP</div>
                             </Modal.Title>
                         </Modal.Header>
                         <Modal.Body>
                             <Form ref={signUpFormRef} noValidate validated={validatedFormSignUp}>
-                                <Row>
-                                    <Form.Group className="mb-3" as={Col} md="6">
-                                        <Form.Control
-                                            value={signUpInfo.lastName}
-                                            name="lastName"
-                                            className="fz-16"
-                                            placeholder="Họ"
-                                            required
-                                            onKeyUp={handleEnterToSignup}
-                                            onChange={handleChangeFormSignUp}
-                                        />
-                                    </Form.Group>
-                                    <Form.Group className="mb-3" as={Col} md="6">
-                                        <Form.Control
-                                            value={signUpInfo.firstName}
-                                            name="firstName"
-                                            className="fz-16"
-                                            placeholder="Tên"
-                                            required
-                                            onKeyUp={handleEnterToSignup}
-                                            onChange={handleChangeFormSignUp}
-                                        />
-                                    </Form.Group>
-                                </Row>
                                 <Form.Group className="mb-3" as={Col} md="12">
                                     <Form.Control
-                                        ref={emailSignupRef}
-                                        value={signUpInfo.email}
-                                        name="email"
+                                        maxLength={6}
+                                        max={6}
+                                        ref={otpRef}
+                                        value={signUpInfo.otp}
+                                        type="text"
+                                        pattern="\d*"
+                                        inputMode="numeric"
+                                        name="otp"
                                         className={clsx('fz-16', {
-                                            [styles['invalid']]: emailExisted.includes(signUpInfo.email),
+                                            [styles['invalid']]: emailExisted.includes(signUpInfo.otp),
                                         })}
-                                        placeholder="email"
+                                        placeholder="Mã OTP"
                                         required
                                         onKeyUp={handleEnterToSignup}
-                                        isInvalid={emailExisted.includes(signUpInfo.email)}
+                                        isInvalid={emailExisted.includes(signUpInfo.otp)}
                                         onChange={handleChangeFormSignUp}
                                     />
-                                    {emailExisted.includes(signUpInfo.email) && (
+                                    {emailExisted.includes(signUpInfo.otp) && (
                                         <Form.Control.Feedback className="fz-16" type="invalid">
-                                            Tài khoản đã tồn tại
+                                            OTP không chính xác hoặc đã hết hạn
                                         </Form.Control.Feedback>
                                     )}
-                                </Form.Group>
-                                <Form.Group className="mb-3 position-relative" as={Col} md="12">
-                                    <Form.Control
-                                        value={signUpInfo.password}
-                                        name="password"
-                                        type={showPasswordSignUp ? 'text' : 'password'}
-                                        className="fz-16"
-                                        minLength={6}
-                                        placeholder="Password"
-                                        required
-                                        onKeyUp={handleEnterToSignup}
-                                        onChange={handleChangeFormSignUp}
-                                    />
-                                    <Form.Control.Feedback className="fz-16" type="invalid">
-                                        Mật khẩu ít nhất 6 ký tự
-                                    </Form.Control.Feedback>
-                                    {showPasswordSignUp ? (
-                                        <FontAwesomeIcon
-                                            className={clsx(styles['show-hide-password'])}
-                                            icon={faEye}
-                                            onClick={toggleShowPasswordSignUp}
-                                        />
-                                    ) : (
-                                        <FontAwesomeIcon
-                                            className={clsx(styles['show-hide-password'])}
-                                            icon={faEyeSlash}
-                                            onClick={toggleShowPasswordSignUp}
-                                        />
-                                    )}
-                                </Form.Group>
-                                <Form.Group className="mb-3" as={Col} md="12">
-                                    <Form.Control
-                                        value={signUpInfo.confirmPassword}
-                                        name="confirmPassword"
-                                        type={showPasswordSignUp ? 'text' : 'password'}
-                                        className="fz-16"
-                                        minLength={6}
-                                        placeholder="Confirm Password"
-                                        required
-                                        onKeyUp={handleEnterToSignup}
-                                        pattern={signUpInfo.password}
-                                        isInvalid={
-                                            validatedFormSignUp && signUpInfo.password !== signUpInfo.confirmPassword
-                                        }
-                                        onChange={handleChangeFormSignUp}
-                                    />
-                                    <Form.Control.Feedback className="fz-16" type="invalid">
-                                        Mật khẩu xác nhận sai
-                                    </Form.Control.Feedback>
                                 </Form.Group>
                             </Form>
                         </Modal.Body>
                         <Modal.Footer>
                             <Button className={clsx('fz-16', styles['sign-up-btn'])} onClick={handleSubmitFormSignUp}>
-                                Đăng ký
+                                Đăng nhập
                             </Button>
                         </Modal.Footer>
                     </Modal>

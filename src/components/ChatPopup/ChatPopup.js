@@ -22,8 +22,6 @@ import { HubConnectionBuilder } from '@microsoft/signalr';
 import { calculateTime, uploadToCloudinary } from '~/utils/commonUtils';
 import { AngryIcon, HaHaIcon, LikeIcon, LoveIcon, SadIcon, WowIcon } from '~/components/Icons';
 import Call from '../Call';
-import 'tippy.js/dist/tippy.css';
-import Tippy from '@tippyjs/react/headless';
 
 const ChatPopup = ({ friend, index }) => {
     const { ref: chatPopupRef, isComponentVisible: isFocus, setIsComponentVisible: setIsFocus } = useClickOutside(true);

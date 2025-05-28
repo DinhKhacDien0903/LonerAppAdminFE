@@ -2,18 +2,18 @@ import { SAVE_USER_INFO, CLEAR_USER_INFO } from '../actions/userActions';
 
 const initialState = {
     id: null,
-    firstName: null,
-    lastName: null,
-    gender: null,
-    dateOfBirthFormatted: null,
-    role: null,
-    avatar: null,
+    userName: null,
+    email: null,
+    phoneNumber: null,
+    about: null,
+    about: null,
+    avatarUrl: null,
+    university: null,
     address: null,
-    school: null,
-    workplace: null,
-    isPrivate: false,
-    totalOfFirend: null,
-    role: null,
+    work: null,
+    isActive: false,
+    gender: null,
+    age: null,
 };
 
 const userReducer = (state = initialState, action) => {
@@ -31,18 +31,18 @@ const userReducer = (state = initialState, action) => {
         case CLEAR_USER_INFO:
             return {
                 id: null,
-                firstName: null,
-                lastName: null,
-                gender: null,
-                dateOfBirthFormatted: null,
-                role: null,
-                avatar: null,
+                userName: null,
+                email: null,
+                phoneNumber: null,
+                about: null,
+                about: null,
+                avatarUrl: null,
+                university: null,
                 address: null,
-                school: null,
-                workplace: null,
-                isPrivate: false,
-                totalOfFirend: null,
-                role: null,
+                work: null,
+                isActive: false,
+                gender: null,
+                age: null,
             };
         default:
             return state;

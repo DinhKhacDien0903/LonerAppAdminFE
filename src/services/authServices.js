@@ -1,19 +1,16 @@
 import axios from '~/utils/axios';
 
-export const signUpService = ({ firstName, lastName, email, password }) => {
-    return axios.post('/Login/signup', {
-        firstName,
-        lastName,
-        userName: email,
+export const verifyOtpService = ({ email, otp, isLoggingIn = true}) => {
+    return axios.post('/Auth/verify-mail-otp-and-register', {
         email,
-        password,
+        otp,
+        isLoggingIn
     });
 };
 
-export const loginService = ({ email, password }) => {
-    return axios.post('/Login/login', {
-        email,
-        password,
+export const loginService = ({ email }) => {
+    return axios.post('/Auth/send-mail-otp', {
+        email
     });
 };
 
