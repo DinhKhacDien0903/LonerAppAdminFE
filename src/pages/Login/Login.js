@@ -28,7 +28,7 @@ function Login() {
         }
     }, []);
 
-    const [loginInfo, setLoginInfo] = useState({ email: ''});
+    const [loginInfo, setLoginInfo] = useState({ email: '' });
     const [showPasswordLogin, setShowPasswordLogin] = useState(false);
     const [validatedFormLogin, setValidatedFormLogin] = useState(false);
     const [errorLogin, setErrorLogin] = useState('');
@@ -38,8 +38,8 @@ function Login() {
     const otpRef = useRef(null);
 
     const [signUpInfo, setSignUpInfo] = useState({
-        email:'',
-        otp :'',
+        email: '',
+        otp: '',
     });
 
     const [showFormSignUp, setShowFormSignUp] = useState(false);
@@ -75,14 +75,11 @@ function Login() {
                 setValidatedFormLogin(true);
                 setErrorLogin('Email không đúng định dạng');
             } else {
-                var res =  await loginService(loginInfo);
-                if(res.isSuccess)
-                {
+                var res = await loginService(loginInfo);
+                if (res.isSuccess) {
                     setShowFormSignUp(true);
                     setErrorLogin('');
-                }
-                else
-                {
+                } else {
                     setErrorLogin(res.Message);
                 }
                 // const fetchPersonalInfo = async () => {
@@ -136,8 +133,9 @@ function Login() {
                     otp: signUpInfo.otp,
                 });
 
-                if(res.isVerified)
-                {
+                if (res.isVerified) {
+                    localStorage.setItem('accessToken', res.accessToken);
+                    localStorage.setItem('refreshToken', res.refreshToken);
                     customToastify.success('Đăng nhập thành công!');
 
                     setSignUpInfo({
@@ -150,9 +148,7 @@ function Login() {
                     setShowFormSignUp(false);
                     localStorage.setItem('isAuthenticated', true);
                     navigate('/');
-                }
-                else
-                {
+                } else {
                     setemailExisted([...emailExisted, signUpInfo.otp]);
                     customToastify.error('Mã OTP không chính xác hoặc đã hết hạn');
                 }
