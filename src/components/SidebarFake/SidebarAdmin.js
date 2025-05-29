@@ -6,6 +6,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import ConfirmLogoutDialog from '../../utils/ConfirmDialog';
 import { sidebarAdminMenu } from './SidebarAdminMenu';
 import { userInfoSelector } from '~/redux/selectors';
+import { logoutService } from '~/services/authServices';
 
 const SidebarAdmin = () => {
     const userInfo = useSelector(userInfoSelector);
@@ -16,9 +17,12 @@ const SidebarAdmin = () => {
         navigate(item.path);
     };
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         localStorage.removeItem('token');
-        window.location.href = '/login';
+        localStorage.removeItem('isAuthenticated');
+        var refreshToken = localStorage.getItem('refreshToken');
+        await logoutService(userInfo?.id, refreshToken ?? "");
+        navigate('/login');
     };
 
     return (

@@ -1,7 +1,9 @@
 import axios from '~/utils/axios';
 
-export const getMyInfoService = () => {
-    return axios.get('/User/getInfor');
+export const getMyInfoService = (userId) => {
+    return axios.get('/User/profile-detail-admin', {
+        params: { userId },
+    });
 };
 
 export const updateMyInfoService = (data) => {

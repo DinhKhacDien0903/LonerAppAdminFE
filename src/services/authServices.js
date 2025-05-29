@@ -1,6 +1,6 @@
 import axios from '~/utils/axios';
 
-export const verifyOtpService = ({ email, otp, isLoggingIn = true}) => {
+export const verifyOtpService = ({ email, otp, isLoggingIn = true }) => {
     return axios.post('/Auth/verify-mail-otp-and-register', {
         email,
         otp,
@@ -14,8 +14,11 @@ export const loginService = ({ email }) => {
     });
 };
 
-export const logoutService = () => {
-    return axios.post('/Login/logout');
+export const logoutService = (userId, refreshToken) => {
+    return axios.post('/Auth/logout', {
+        userId,
+        refreshToken
+    });
 };
 
 export const deleteAccountService = (password) => {

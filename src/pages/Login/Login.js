@@ -15,11 +15,11 @@ function Login() {
     const navigate = useNavigate(null);
     const dispatch = useDispatch();
 
-    // useEffect(() => {
-    //     if (localStorage.getItem('isAuthenticated')) {
-    //         navigate('/');
-    //     }
-    // }, []);
+    useEffect(() => {
+        if (localStorage.getItem('isAuthenticated')) {
+            navigate('/admin');
+        }
+    }, []);
 
     useEffect(() => {
         if (localStorage.getItem('showToastOnLogin')) {
@@ -82,23 +82,6 @@ function Login() {
                 } else {
                     setErrorLogin(res.Message);
                 }
-                // const fetchPersonalInfo = async () => {
-                //     const res = (await getMyInfoService()).data;
-                //     dispatch(
-                //         actions.saveUserInfo({
-                //             id: res?.id,
-                //             firstName: res?.firstName,
-                //             lastName: res?.lastName,
-                //             age: '18',
-                //             avatar: res?.avatarUrl,
-                //             address: res?.address,
-                //             school: 'Haui',
-                //             workplace: 'NewwaveJSC',
-                //             role: res?.role,
-                //         }),
-                //     );
-                // };
-                // fetchPersonalInfo();
             }
         } catch (error) {
             console.log(error);
@@ -136,6 +119,29 @@ function Login() {
                 if (res.isVerified) {
                     localStorage.setItem('accessToken', res.accessToken);
                     localStorage.setItem('refreshToken', res.refreshToken);
+                    var currentUserIdLoggedIn = res.userId;
+                    const fetchPersonalInfo = async () => {
+                        const res = (await getMyInfoService(currentUserIdLoggedIn)).userDetail;
+                        console.log(res);
+                        dispatch(
+                            actions.saveUserInfo({
+                                id: res?.id ?? "",
+                                userName: res?.userName ?? "",
+                                email: res?.email ?? "",
+                                phoneNumber: res?.phoneNumber ?? "",
+                                about: res?.about ?? "",
+                                avatarUrl: res?.avatarUrl ?? "",
+                                address: res?.address ?? "",
+                                university: res?.university ?? "",
+                                work: res?.work ?? "",
+                                isActive: res?.isActive ?? false,
+                                gender: res?.gender ?? false,
+                                age: res?.age ?? 0,
+                                dateOfBirth: res?.dateOfBirth ?? "",
+                            }),
+                        );
+                    };
+                    fetchPersonalInfo();
                     customToastify.success('Đăng nhập thành công!');
 
                     setSignUpInfo({
@@ -147,7 +153,7 @@ function Login() {
                     setValidatedFormSignUp(false);
                     setShowFormSignUp(false);
                     localStorage.setItem('isAuthenticated', true);
-                    navigate('/');
+                    navigate('/admin');
                 } else {
                     setemailExisted([...emailExisted, signUpInfo.otp]);
                     customToastify.error('Mã OTP không chính xác hoặc đã hết hạn');

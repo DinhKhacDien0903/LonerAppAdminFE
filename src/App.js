@@ -1,9 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { BrowserRouter, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import routes, { protectedRoutes } from '~/routes';
+import { BrowserRouter, Route, Routes, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { SetupInterceptors } from '~/utils/axios';
-import DefaultLayout from '~/layouts/DefaultLayout';
 import { getMyInfoService } from '~/services/userServices';
 import * as actions from '~/redux/actions';
 import signalRClient from '~/components/Post/signalRClient';
@@ -12,8 +10,7 @@ import ChatPopup from '~/components/ChatPopup';
 import ChatGroupPopup from '~/components/ChatGroupPopup';
 import { getAllEmotionsService } from '~/services/postServices';
 import HomePageAdmin from '~/pages/Home/AdminPage/HomePageAdmin';
-import AdminReport from "~/pages/Home/AdminPage/AdminReport";
-import { HubConnectionBuilder } from '@microsoft/signalr';
+import Login from '~/pages/Login';
 
 function NavigateFunctionComponent() {
     let navigate = useNavigate();
@@ -57,61 +54,13 @@ function App() {
     return (
         <FetchAllEmotionsPost>
             <BrowserRouter>
-            <Routes>
-                <Route path="/" element={<AdminReport />} />
-                <Route path="/admin/*" element={<HomePageAdmin />} />
-            </Routes>
+                <Routes>
+                    <Route path="/" element={<Navigate to="/login" replace />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/admin/*" element={<HomePageAdmin />} />
+                </Routes>
                 <NavigateFunctionComponent />
                 <FetchUserInfo />
-                {openChats?.slice(0, 2)?.map((item, index) => {
-                    if (item?.isGroupChat) {
-                        return <ChatGroupPopup index={index} key={`group-chat-${item?.id}`} group={item} />;
-                    }
-                    return <ChatPopup index={index} key={`friend-chat-${item?.id}`} friend={item} />;
-                })}
-                {/* <Routes>
-                    {routes.map((route, index) => {
-                        const Page = route.component;
-                        let Layout = DefaultLayout;
-                        if (route.layout) {
-                            Layout = route.layout;
-                        } else if (route.layout === null) {
-                            Layout = React.Fragment;
-                        }
-                        return (
-                            <Route
-                                key={`route-${index}`}
-                                path={route.path}
-                                element={
-                                    <Layout notificationConnection={notificationConnection}>
-                                        <Page />
-                                    </Layout>
-                                }
-                            />
-                        );
-                    })}
-                    {
-                        protectedRoutes.map((route, index) => {
-                            const Page = route.element;
-                            let Layout = DefaultLayout;
-                            if (route.layout) {
-                                Layout = route.layout;
-                            } else if (route.layout === null) {
-                                Layout = React.Fragment;
-                            }
-                            return (
-                                <Route
-                                    key={`route-admin-${index}`}
-                                    path={route.path}
-                                    element={
-                                        <Layout>
-                                            <Page />
-                                        </Layout>
-                                    }
-                                ></Route>
-                            );
-                        })}
-                </Routes> */}
             </BrowserRouter>
         </FetchAllEmotionsPost>
     );
@@ -124,21 +73,22 @@ function FetchUserInfo() {
     useEffect(() => {
         const fetchPersonalInfo = async () => {
             try {
-                const res = (await getMyInfoService()).data;
+                const res = (await getMyInfoService()).userDetail;
                 dispatch(
                     actions.saveUserInfo({
-                        id: res?.id,
-                        firstName: res?.firstName,
-                        lastName: res?.lastName,
-                        dateOfBirthFormatted: res?.dateOfBirthFormatted,
-                        avatar: res?.avatarUrl,
-                        address: res?.address,
-                        school: res?.school,
-                        workplace: res?.workplace,
-                        gender: res?.gender,
-                        isPrivate: res?.isPrivate,
-                        totalOfFirend: res?.totalOfFirend,
-                        role: res?.role,
+                        id: res?.id ?? "",
+                        userName: res?.userName ?? "",
+                        email: res?.email ?? "",
+                        phoneNumber: res?.phoneNumber ?? "",
+                        about: res?.about ?? "",
+                        avatarUrl: res?.avatarUrl ?? "",
+                        address: res?.address ?? "",
+                        university: res?.university ?? "",
+                        work: res?.work ?? "",
+                        isActive: res?.isActive ?? false,
+                        gender: res?.gender ?? false,
+                        age: res?.age ?? 0,
+                        dateOfBirth: res?.dateOfBirth ?? "",
                     }),
                 );
             } catch (error) {
