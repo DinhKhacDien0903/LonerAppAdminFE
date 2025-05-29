@@ -5,9 +5,10 @@ import { useSelector } from 'react-redux';
 import LogoutIcon from '@mui/icons-material/Logout';
 import ConfirmLogoutDialog from '../../utils/ConfirmDialog';
 import { sidebarAdminMenu } from './SidebarAdminMenu';
+import { userInfoSelector } from '~/redux/selectors';
 
 const SidebarAdmin = () => {
-    const { auth } = useSelector((store) => store);
+    const userInfo = useSelector(userInfoSelector);
     const navigate = useNavigate();
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
@@ -24,11 +25,12 @@ const SidebarAdmin = () => {
         <div className="card h-screen flex flex-col justify-between py-5 bg-gray-100">
             <div className="space-y-8 pl-5 pr-5">
                 <div>
-                    <span className="logo font-bold text-xl">FRIEND LINK</span>
+                    <span className="logo font-bold text-xl">LONER DATETING</span>
                 </div>
                 <div className="space-y-8">
                     {sidebarAdminMenu.map((item) => (
                         <div
+                            key={item.id || item.title || index}
                             onClick={() => handleNavigate(item)}
                             className="flex space-x-3 items-centers cursor-pointer"
                         >
@@ -44,8 +46,8 @@ const SidebarAdmin = () => {
                     <div className="flex items-center space-x-3">
                         <Avatar src="https://res.cloudinary.com/de0werx80/image/upload/v1747491899/pexels-photo-30123498_t3a75p.webp" />
                         <div>
-                            <p className="font-bold">{auth.user.fullName || auth.user.username}</p>
-                            <p className="opacity-70">{auth.user.userEmail}</p>
+                            <p className="font-bold">{userInfo?.userName}</p>
+                            <p className="opacity-70">{userInfo?.email}</p>
                         </div>
                     </div>
                     <div className="flex items-center pt-3 gap-x-2">

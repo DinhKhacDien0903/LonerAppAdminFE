@@ -1,5 +1,5 @@
 import Header from '~/components/Header';
-import SidebarAdmin from '~/components/SidebarAdmin';
+import SidebarAdmin from "~/components/SidebarFake/SidebarAdmin";
 
 const AdminLayout = ({ children }) => {
     return (

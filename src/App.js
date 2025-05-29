@@ -11,6 +11,8 @@ import { openChatsSelector, userInfoSelector } from '~/redux/selectors';
 import ChatPopup from '~/components/ChatPopup';
 import ChatGroupPopup from '~/components/ChatGroupPopup';
 import { getAllEmotionsService } from '~/services/postServices';
+import HomePageAdmin from '~/pages/Home/AdminPage/HomePageAdmin';
+import AdminReport from "~/pages/Home/AdminPage/AdminReport";
 import { HubConnectionBuilder } from '@microsoft/signalr';
 
 function NavigateFunctionComponent() {
@@ -29,32 +31,36 @@ function App() {
     const userInfo = useSelector(userInfoSelector);
     const [notificationConnection, setNotificationConnection] = useState(null);
 
-    useEffect(() => {
-        const connectNotificationHub = async () => {
-            const connection = new HubConnectionBuilder()
-                .withUrl('https://localhost:7072/notification')
-                .withAutomaticReconnect()
-                .build();
+    // useEffect(() => {
+    //     const connectNotificationHub = async () => {
+    //         const connection = new HubConnectionBuilder()
+    //             .withUrl('https://localhost:7072/notification')
+    //             .withAutomaticReconnect()
+    //             .build();
 
-            try {
-                await connection.start();
-                setNotificationConnection(connection);
-            } catch (error) {
-                console.error('Notification Hub Connection Failed:', error);
-            }
-        };
+    //         try {
+    //             await connection.start();
+    //             setNotificationConnection(connection);
+    //         } catch (error) {
+    //             console.error('Notification Hub Connection Failed:', error);
+    //         }
+    //     };
 
-        connectNotificationHub();
+    //     connectNotificationHub();
 
-        return () => {
-            if (notificationConnection) {
-                notificationConnection.stop();
-            }
-        };
-    }, []);
+    //     return () => {
+    //         if (notificationConnection) {
+    //             notificationConnection.stop();
+    //         }
+    //     };
+    // }, []);
     return (
         <FetchAllEmotionsPost>
             <BrowserRouter>
+            <Routes>
+                <Route path="/" element={<AdminReport />} />
+                <Route path="/admin/*" element={<HomePageAdmin />} />
+            </Routes>
                 <NavigateFunctionComponent />
                 <FetchUserInfo />
                 {openChats?.slice(0, 2)?.map((item, index) => {
@@ -63,7 +69,7 @@ function App() {
                     }
                     return <ChatPopup index={index} key={`friend-chat-${item?.id}`} friend={item} />;
                 })}
-                <Routes>
+                {/* <Routes>
                     {routes.map((route, index) => {
                         const Page = route.component;
                         let Layout = DefaultLayout;
@@ -105,7 +111,7 @@ function App() {
                                 ></Route>
                             );
                         })}
-                </Routes>
+                </Routes> */}
             </BrowserRouter>
         </FetchAllEmotionsPost>
     );

@@ -6,9 +6,11 @@ import { useSelector } from "react-redux";
 import { MINIO_BASE_URL } from "../../config/api";
 import LogoutIcon from '@mui/icons-material/Logout';
 import ConfirmLogoutDialog from "../../utils/ConfirmDialog";
+import { useSelector } from 'react-redux';
+import { userInfoSelector } from '~/redux/selectors';
 
 const Sidebar = () => {
-    const {auth} = useSelector(store => store);
+    const userInfo = useSelector(userInfoSelector);
     const navigate = useNavigate();
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
 
