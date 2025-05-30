@@ -48,7 +48,7 @@ const SidebarAdmin = () => {
                 <Divider />
                 <div className="flex flex-col justify-between pt-5 px-5">
                     <div className="flex items-center space-x-3">
-                        <Avatar src="https://res.cloudinary.com/de0werx80/image/upload/v1747491899/pexels-photo-30123498_t3a75p.webp" />
+                        <Avatar src={userInfo.avatarUrl} />
                         <div>
                             <p className="font-bold">{userInfo?.userName}</p>
                             <p className="opacity-70">{userInfo?.email}</p>

@@ -142,9 +142,8 @@ const UserManage = () => {
                                 <TableCell>{formatMessageTime(user.createdAt)}</TableCell>
                                 <TableCell>
                                     <div
-                                        className={`w-8 h-4 rounded-full mx-auto ${
-                                            user.isActive ? 'bg-green-500' : 'bg-red-500'
-                                        }`}
+                                        className={`w-8 h-4 rounded-full mx-auto ${user.isActive ? 'bg-green-500' : 'bg-red-500'
+                                            }`}
                                     />
                                 </TableCell>
                                 <TableCell>
