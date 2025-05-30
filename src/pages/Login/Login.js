@@ -117,8 +117,8 @@ function Login() {
                 });
 
                 if (res.isVerified) {
-                    localStorage.setItem('accessToken', res.accessToken);
-                    localStorage.setItem('refreshToken', res.refreshToken);
+                    // localStorage.setItem('accessToken', res.accessToken);
+                    // localStorage.setItem('refreshToken', res.refreshToken);
                     var currentUserIdLoggedIn = res.userId;
                     const fetchPersonalInfo = async () => {
                         const res = (await getMyInfoService(currentUserIdLoggedIn)).userDetail;
