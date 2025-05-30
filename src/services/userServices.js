@@ -56,3 +56,15 @@ export const getSearchUserService = ({ keyWord, PageIndex, PageSize }) => {
         },
     });
 };
+
+export const getAllUserForAdmin = async (userName = "", phoneNumber = "", email = "", pageNumber, pageSize) => {
+    return await axios.get('/user/get-all-users-admin', {
+        params: {
+            userName,
+            phoneNumber,
+            email,
+            pageNumber,
+            pageSize,
+        }
+    });
+};

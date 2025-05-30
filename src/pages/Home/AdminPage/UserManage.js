@@ -16,6 +16,7 @@ import {
 import { formatMessageTime } from '../../../utils/timeFormatter';
 import { toast } from 'react-toastify';
 import ConfirmLogoutDialog from '../../../utils/ConfirmDialog';
+import { getAllUserForAdmin } from '../../../services/userServices';
 
 const UserManage = () => {
     const [users, setUsers] = useState([]);
@@ -33,19 +34,9 @@ const UserManage = () => {
 
     const fetchData = async () => {
         try {
-            const res = await axios.post(
-                `${API_BASE_URL}/admin/get-all-user`,
-                {
-                    pageNumber: page,
-                    pageSize: 10,
-                    filter: filters,
-                    common: '',
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            setUsers(res.data.content || []);
+            const res = await getAllUserForAdmin(filters.username, filters.fullName, filters.userEmail, page, 30);
+            setUsers(res.data.items || []);
+            console.log('Dữ liệu người dùng:', res.data.items);
             setTotalPages(res.data.totalPages);
         } catch (err) {
             console.error('Lỗi khi lấy dữ liệu người dùng', err);
@@ -111,11 +102,12 @@ const UserManage = () => {
                     <TableHead className="bg-gray-100">
                         <TableRow>
                             <TableCell>STT</TableCell>
-                            <TableCell>Username</TableCell>
+                            <TableCell>User Name</TableCell>
                             <TableCell>Ảnh</TableCell>
                             <TableCell>Họ tên</TableCell>
                             <TableCell>Ngày sinh</TableCell>
                             <TableCell>Email</TableCell>
+                            <TableCell>Số điện thoại</TableCell>
                             <TableCell>Ngày tạo</TableCell>
                             <TableCell>Trạng thái</TableCell>
                             <TableCell>Hành động</TableCell>
@@ -124,12 +116,12 @@ const UserManage = () => {
                     <TableBody>
                         {users.map((user, index) => (
                             <TableRow key={user.id}>
-                                <TableCell>{page * 10 + index + 1}</TableCell>
-                                <TableCell>{user.username}</TableCell>
+                                <TableCell>{page * 30 + index + 1}</TableCell>
+                                <TableCell>{user.userName}</TableCell>
                                 <TableCell>
-                                    {user.userImage ? (
+                                    {user.avatarUrl ? (
                                         <Avatar
-                                            src={`${MINIO_BASE_URL}/${user.userImage}`}
+                                            src={user.avatarUrl}
                                             className="w-10 h-10 object-cover rounded-full"
                                         />
                                     ) : (
@@ -137,8 +129,9 @@ const UserManage = () => {
                                     )}
                                 </TableCell>
                                 <TableCell>{user.fullName}</TableCell>
-                                <TableCell>{user.userDOB}</TableCell>
-                                <TableCell>{user.userEmail}</TableCell>
+                                <TableCell>{formatMessageTime(user.dateOfBirth)}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>{user.phoneNumber ?? "Chưa thiết lập"}</TableCell>
                                 <TableCell>{formatMessageTime(user.createdAt)}</TableCell>
                                 <TableCell>
                                     <div
@@ -151,7 +144,7 @@ const UserManage = () => {
                                         variant="outlined"
                                         color="error"
                                         size="small"
-                                        disabled={!user.isActive}
+                                        disabled={user.isDeleted}
                                         onClick={() => {
                                             setDeletedUserId(user.id);
                                             setOpenConfirmDialog(true);

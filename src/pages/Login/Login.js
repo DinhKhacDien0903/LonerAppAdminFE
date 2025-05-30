@@ -138,6 +138,9 @@ function Login() {
                                 gender: res?.gender ?? false,
                                 age: res?.age ?? 0,
                                 dateOfBirth: res?.dateOfBirth ?? "",
+                                isDeleted: res?.isDeleted ?? false,
+                                createdAt: res?.createdAt ?? "",
+                                fullName: res?.fullName ?? "",
                             }),
                         );
                     };

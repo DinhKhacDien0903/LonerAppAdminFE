@@ -6,7 +6,6 @@ const initialState = {
     email: null,
     phoneNumber: null,
     about: null,
-    about: null,
     avatarUrl: null,
     university: null,
     address: null,
@@ -14,6 +13,9 @@ const initialState = {
     isActive: false,
     gender: null,
     age: null,
+    isDeleted: null,
+    createdAt: null,
+    fullName: null,
 };
 
 const userReducer = (state = initialState, action) => {
@@ -43,6 +45,9 @@ const userReducer = (state = initialState, action) => {
                 isActive: false,
                 gender: null,
                 age: null,
+                isDeleted: null,
+                createdAt: null,
+                fullName: null,
             };
         default:
             return state;
