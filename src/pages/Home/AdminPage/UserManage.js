@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 import {
     TextField,
     Button,
@@ -16,13 +15,14 @@ import {
 import { formatMessageTime } from '../../../utils/timeFormatter';
 import { toast } from 'react-toastify';
 import ConfirmLogoutDialog from '../../../utils/ConfirmDialog';
-import { getAllUserForAdmin } from '../../../services/userServices';
+import { getAllUserForAdmin, setAccountLockStateAsync } from '../../../services/userServices';
 
 const UserManage = () => {
     const [users, setUsers] = useState([]);
     const [page, setPage] = useState(0);
     const [totalPages, setTotalPages] = useState(1);
-    const [deletedUserId, setDeletedUserId] = useState();
+    const [actionUserId, setActionUserId] = useState();
+    const [isActionDetete, setIsActionDelete] = useState(true);
 
     const [filters, setFilters] = useState({
         username: '',
@@ -54,14 +54,11 @@ const UserManage = () => {
 
     const handleDeleteUser = async (userId) => {
         try {
-            const { data } = await axios.put(
-                `${API_BASE_URL}/admin/delete-user/${userId}`,
-                {},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            toast.success(data.message);
+            var result = await setAccountLockStateAsync({ userId, isDeleted: isActionDetete });
+            if (result.isSuccess)
+                toast.success(result.message);
+            else
+                toast.error(result.message);
             fetchData();
             setOpenConfirmDialog(false);
         } catch (err) {
@@ -81,7 +78,7 @@ const UserManage = () => {
                     onChange={(e) => setFilters({ ...filters, username: e.target.value })}
                 />
                 <TextField
-                    label="Full Name"
+                    label="Số điện thoại"
                     size="small"
                     value={filters.fullName}
                     onChange={(e) => setFilters({ ...filters, fullName: e.target.value })}
@@ -130,7 +127,7 @@ const UserManage = () => {
                                 </TableCell>
                                 <TableCell>{user.fullName}</TableCell>
                                 <TableCell>{formatMessageTime(user.dateOfBirth)}</TableCell>
-                                <TableCell>{user.email}</TableCell>
+                                <TableCell>{user.email ?? "Chưa thiết lập"}</TableCell>
                                 <TableCell>{user.phoneNumber ?? "Chưa thiết lập"}</TableCell>
                                 <TableCell>{formatMessageTime(user.createdAt)}</TableCell>
                                 <TableCell>
@@ -142,15 +139,15 @@ const UserManage = () => {
                                 <TableCell>
                                     <Button
                                         variant="outlined"
-                                        color="error"
+                                        color={user.isDeleted ? "info" : "error"}
                                         size="small"
-                                        disabled={user.isDeleted}
                                         onClick={() => {
-                                            setDeletedUserId(user.id);
+                                            setActionUserId(user.id);
+                                            setIsActionDelete(!user.isDeleted);
                                             setOpenConfirmDialog(true);
                                         }}
                                     >
-                                        Xóa
+                                        {user.isDeleted == true ? "Mở khóa" : "Khóa"}
                                     </Button>
                                 </TableCell>
                             </TableRow>
@@ -170,8 +167,8 @@ const UserManage = () => {
             <ConfirmLogoutDialog
                 open={openConfirmDialog}
                 onClose={() => setOpenConfirmDialog(false)}
-                onConfirm={() => handleDeleteUser(deletedUserId)}
-                content={'Bạn có chắc chắn muốn xóa người dùng không?'}
+                onConfirm={() => handleDeleteUser(actionUserId)}
+                content={isActionDetete ? 'Bạn có chắc chắn muốn khóa người dùng không?' : "Bạn có chắc chắn muốn mở khóa người dùng này không?"}
             />
         </div>
     );

@@ -29,7 +29,7 @@ const SidebarAdmin = () => {
         <div className="card h-screen flex flex-col justify-between py-5 bg-gray-100">
             <div className="space-y-8 pl-5 pr-5">
                 <div>
-                    <span className="logo font-bold text-xl">LONER DATETING</span>
+                    <span className="logo font-bold text-xl">LONER DATING</span>
                 </div>
                 <div className="space-y-8">
                     {sidebarAdminMenu.map((item) => (

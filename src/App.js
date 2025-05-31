@@ -11,6 +11,7 @@ import ChatGroupPopup from '~/components/ChatGroupPopup';
 import { getAllEmotionsService } from '~/services/postServices';
 import HomePageAdmin from '~/pages/Home/AdminPage/HomePageAdmin';
 import Login from '~/pages/Login';
+import 'react-toastify/dist/ReactToastify.css';
 
 function NavigateFunctionComponent() {
     let navigate = useNavigate();

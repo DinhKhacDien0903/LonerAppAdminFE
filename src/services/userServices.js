@@ -57,6 +57,7 @@ export const getSearchUserService = ({ keyWord, PageIndex, PageSize }) => {
     });
 };
 
+//api for admin
 export const getAllUserForAdmin = async (userName = "", phoneNumber = "", email = "", pageNumber, pageSize) => {
     return await axios.get('/user/get-all-users-admin', {
         params: {
@@ -66,5 +67,32 @@ export const getAllUserForAdmin = async (userName = "", phoneNumber = "", email 
             pageNumber,
             pageSize,
         }
+    });
+};
+
+export const getAllReportsAsync = async (reporterName = "", reportedName = "", reason = "", pageNumber, pageSize) => {
+    return await axios.get('/user/get-all-reports', {
+        params: {
+            reporterName,
+            reportedName,
+            reason,
+            pageNumber,
+            pageSize,
+        }
+    });
+};
+
+export const setAccountLockStateAsync = ({ userId, isDeleted }) => {
+    return axios.post(`/User/set-account-lock-state`,
+        {
+            userId,
+            isDeleted
+        }
+    );
+};
+
+export const deleteReportAsync = ({ resolverId, reportId }) => {
+    return axios.delete(`/User/delete-report`, {
+        data: { reportId, resolverId }
     });
 };

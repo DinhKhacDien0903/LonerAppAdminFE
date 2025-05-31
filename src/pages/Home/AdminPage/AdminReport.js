@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import {
@@ -15,6 +14,8 @@ import {
 } from '@mui/material';
 import { formatMessageTime } from '../../../utils/timeFormatter';
 import ConfirmLogoutDialog from '../../../utils/ConfirmDialog';
+import { getAllReportsAsync, deleteReportAsync } from '../../../services/userServices';
+import { HubConnectionBuilder } from '@microsoft/signalr';
 
 const AdminReport = () => {
     const [reports, setReports] = useState([]);
@@ -27,23 +28,16 @@ const AdminReport = () => {
     });
     const token = localStorage.getItem('token');
     const [deletedReportId, setDeletedReportId] = useState();
+    const [currentReport, setCurrentReport] = useState();
     const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
+    const [openConfirmSendReportDialog, setOpenConfirmSendReportDialog] = useState(false);
+    const [conn, setConn] = useState('');
 
     const fetchReport = async () => {
         try {
-            const res = await axios.post(
-                `${API_BASE_URL}/report/get-all`,
-                {
-                    pageNumber: page,
-                    pageSize: 10,
-                    filter: filters,
-                    common: '',
-                },
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            setReports(res.data.content || []);
+            const res = await getAllReportsAsync(filters.senderUsername, filters.reportedUsername, filters.reportedPostCaption, page, 30);
+            console.log('Dữ liệu báo cáo:', res.data);
+            setReports(res.data.items || []);
             setTotalPages(res.data.totalPages);
         } catch (err) {
             toast.error('Có lỗi khi lấy danh sách báo cáo');
@@ -61,20 +55,65 @@ const AdminReport = () => {
 
     const handleDeleteReport = async (reportId) => {
         try {
-            const { data } = await axios.put(
-                `${API_BASE_URL}/report/delete/${reportId}`,
-                {},
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                },
-            );
-            toast.success(data.message);
+            var result = await deleteReportAsync({ resolverId: "dsaa", reportId });
+            if (result.isSuccess)
+                toast.success(result.message);
+            else
+                toast.error(result.message);
             fetchReport();
             setOpenConfirmDialog(false);
         } catch (err) {
             toast.error('Lỗi khi xóa báo cáo');
+            console.log('Lỗi khi xóa báo cáo', err);
         }
     };
+
+    const handleSendReportToUserAsync = async (report) => {
+        try {
+            var notificationParameter = {
+                receiverId: report?.reportedId,
+                content: `Bạn đã nhận được cảnh báo về ${report.reason}`,
+                images: ""
+            };
+            var result = await conn.invoke('SendWarningNotificationReportToUser', notificationParameter);
+            if (result)
+                toast.success("Gửi cảnh báo thành công!");
+            else
+                toast.error("Gửi cảnh báo thất bại!");
+            fetchReport();
+            setOpenConfirmSendReportDialog(false);
+        } catch (err) {
+            toast.error('Lỗi khi gửi cảnh báo');
+            console.log('Lỗi khi xóa cảnh báo', err);
+        }
+    };
+
+    useEffect(() => {
+        const connection = new HubConnectionBuilder().withUrl('https://localhost:7165/notification').build();
+
+        const startConnection = async () => {
+            try {
+                await connection.start();
+
+                setConn(connection);
+
+                connection.on('UserNotConnected', (errorMessage) => {
+                    setError(errorMessage);
+                    console.error('Error received: ', errorMessage);
+                });
+            } catch (error) {
+                console.error('Error establishing connection:', error);
+            }
+        };
+
+        startConnection();
+        return () => {
+            if (connection) {
+                connection.stop();
+                console.log('Connection closed');
+            }
+        };
+    }, []);
 
     return (
         <div className="p-6">
@@ -82,7 +121,7 @@ const AdminReport = () => {
 
             <div className="flex gap-4 mb-4">
                 <TextField
-                    label="Nội dung bài viết"
+                    label="Lý do báo cáo"
                     size="small"
                     value={filters.reportedPostCaption}
                     onChange={(e) => setFilters({ ...filters, reportedPostCaption: e.target.value })}
@@ -111,30 +150,41 @@ const AdminReport = () => {
                             <TableCell>STT</TableCell>
                             <TableCell>Thời gian</TableCell>
                             <TableCell>Lý do</TableCell>
-                            <TableCell>Bài viết (ID)</TableCell>
-                            <TableCell>Tiêu đề</TableCell>
+                            <TableCell>Mô tả thêm</TableCell>
                             <TableCell>Người bị báo cáo</TableCell>
                             <TableCell>Người gửi</TableCell>
+                            <TableCell>Gửi cảnh báo</TableCell>
                             <TableCell>Hành động</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
                         {reports.map((report, index) => (
                             <TableRow key={report.reportId}>
-                                <TableCell>{page * 10 + index + 1}</TableCell>
+                                <TableCell>{page * 30 + index + 1}</TableCell>
                                 <TableCell>{formatMessageTime(report.createdAt)}</TableCell>
                                 <TableCell>{report.reason}</TableCell>
-                                <TableCell>{report.reportedPostId || 'N/A'}</TableCell>
-                                <TableCell>{report.reportedPostCaption || 'N/A'}</TableCell>
-                                <TableCell>{report.reportedUsername}</TableCell>
-                                <TableCell>{report.senderUsername}</TableCell>
+                                <TableCell>{report.moreInformation || 'N/A'}</TableCell>
+                                <TableCell>{report.repotedName}</TableCell>
+                                <TableCell>{report.repoterName}</TableCell>
+                                <TableCell>
+                                    <Button
+                                        variant="outlined"
+                                        color="warning"
+                                        size="small"
+                                        onClick={() => {
+                                            setCurrentReport(report);
+                                            setOpenConfirmSendReportDialog(true);
+                                        }}
+                                    >
+                                        Gửi cảnh báo
+                                    </Button></TableCell>
                                 <TableCell>
                                     <Button
                                         variant="outlined"
                                         color="error"
                                         size="small"
                                         onClick={() => {
-                                            setDeletedReportId(report.reportId);
+                                            setDeletedReportId(report.id);
                                             setOpenConfirmDialog(true);
                                         }}
                                     >
@@ -159,7 +209,14 @@ const AdminReport = () => {
                 open={openConfirmDialog}
                 onClose={() => setOpenConfirmDialog(false)}
                 onConfirm={() => handleDeleteReport(deletedReportId)}
-                content={'Bạn có chắc chắn muốn báo cáo này không?'}
+                content={'Bạn có chắc chắn muốn xóa báo cáo này không?'}
+            />
+
+            <ConfirmLogoutDialog
+                open={openConfirmSendReportDialog}
+                onClose={() => setOpenConfirmSendReportDialog(false)}
+                onConfirm={() => handleSendReportToUserAsync(currentReport)}
+                content={'Bạn có chắc chắn muốn gửi cảnh báo không?'}
             />
         </div>
     );
