@@ -164,13 +164,14 @@ const AdminReport = () => {
                                 <TableCell>{formatMessageTime(report.createdAt)}</TableCell>
                                 <TableCell>{report.reason}</TableCell>
                                 <TableCell>{report.moreInformation || 'N/A'}</TableCell>
-                                <TableCell>{report.repotedName}</TableCell>
-                                <TableCell>{report.repoterName}</TableCell>
+                                <TableCell>{report.repotedName || 'N/A'}</TableCell>
+                                <TableCell>{report.repoterName || 'N/A'}</TableCell>
                                 <TableCell>
                                     <Button
                                         variant="outlined"
                                         color="warning"
                                         size="small"
+                                        disabled={report.isReportedBlocked}
                                         onClick={() => {
                                             setCurrentReport(report);
                                             setOpenConfirmSendReportDialog(true);
