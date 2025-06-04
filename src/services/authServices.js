@@ -9,7 +9,7 @@ export const verifyOtpService = ({ email, otp, isLoggingIn = true }) => {
 };
 
 export const loginService = ({ email }) => {
-    return axios.post('/Auth/send-mail-otp', {
+    return axios.post('/Auth/send-mail-otp-admin', {
         email
     });
 };
